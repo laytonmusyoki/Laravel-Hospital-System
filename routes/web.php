@@ -23,6 +23,10 @@ Route::get('/register',[UserController::class,'register']);
 Route::post('/register',[UserController::class,'registerpost']);
 Route::get('/login',[UserController::class,'login'])->name('login');
 Route::post('/login',[UserController::class,'loginpost']);
+Route::get('/forgot',[UserController::class,'forgot']);
+Route::post('/forgot',[UserController::class,'forgotpost']);
+Route::get('/reset/{token}',[UserController::class,'reset'])->name('reset');
+Route::put('/resetpost/{token}',[UserController::class,'resetpost'])->name('resetpost');
 Route::get('/logout',[UserController::class,'logout']);
 
 Route::group(['middleware'=>'auth'],function(){

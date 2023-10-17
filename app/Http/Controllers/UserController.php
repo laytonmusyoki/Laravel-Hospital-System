@@ -6,7 +6,12 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Schedule;
 use App\Models\Appointment;
+use App\Models\PasswordReset;
 use App\Models\Profile;
+use Str;
+use Mail;
+use carbon\Carbon;
+use App\Mail\ResetPassword;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
 
@@ -221,4 +226,54 @@ class UserController extends Controller
         return redirect('dashboard')->with('success','Schedule added successfully');
     }
 
+    public function forgot(){
+        return view('Accounts.forgot');
+    }
+
+    public function forgotpost(Request $request){
+        $email=$request->email;
+        $record=User::where('email',$email)->get()->first();
+        if($record){
+            $token=Str::random(200);
+            $data['user_id']=$record->id;
+            $data['token']=$token;
+            $data['created']=Carbon::now();
+            $username=$record->username;
+            PasswordReset::create($data);
+            Mail::to($email)->send(new ResetPassword($token,$username));
+            return redirect('forgot')->with('success','Reset link send to your email');
+        }
+        else{
+            return redirect('forgot')->with('error','Email not found try again');
+        }
+    }
+    public function reset($token){
+        $record = PasswordReset::where('token', $token)->first();
+        if (!$record || Carbon::now()->subMinutes(15) > $record->created) {
+            return redirect('forgot')->with('error', 'Your reset token has expired');
+        } else {
+            return view('Accounts.reset', compact('token'));
+        }
+    }
+    
+    public function resetpost(Request $request, $token){
+        $record = PasswordReset::where('token', $token)->first();
+        if (Carbon::now()->subMinutes(15) > $record->created) {
+            return redirect('forgot')->with('error', 'Your reset token has expired');
+        }
+        else {
+        if($request->password != $request->confirm){
+            return back()->with('error', 'Password do not match');
+        }
+        else{
+        $id = $record->user_id;
+        $user = User::where('id', $id)->first();
+        $user->password = $request->password;
+        $user->update();
+        $record->delete();
+        return redirect('login')->with('success', 'Your password has been reset');
+        }
+    }
+    }
+    
 }

@@ -18,12 +18,10 @@
         </div>
         @endif
     
-        <form action="/login" method="POST">
+        <form action="/forgot" method="POST">
             @csrf
-        <input type="text"name="username" value="" required placeholder="Enter Username">
-        <input type="password" name="password" value="" required placeholder="Enter Password">
-        <button class="btn btn-success">Login</button>
+        <input type="email"name="email" value="" required placeholder="Enter Your email">
+        <button class="btn btn-success">Request-Link</button>
     </form>
-    <p>Don't have an account? <a href="{{url('register')}}">Register</a></p>
-    <p>Forgot your password? <a href="{{url('forgot')}}">Click here!</a></p>
+    <p>Already have an account? <a href="{{ url('login') }}">Login</a></p>
 </div>
